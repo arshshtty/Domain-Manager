@@ -14,18 +14,28 @@ export class DomainManagerService {
   }
 
   private loadCredentials() {
-    // Load Cloudflare credentials
+    // Load Cloudflare credentials from database, fallback to env vars
     const cfCreds = this.db.getCredentials('cloudflare');
     if (cfCreds) {
       const { apiToken, accountId } = JSON.parse(cfCreds);
       this.cloudflare = new CloudflareService(apiToken, accountId);
+    } else if (process.env.CLOUDFLARE_API_TOKEN) {
+      this.cloudflare = new CloudflareService(
+        process.env.CLOUDFLARE_API_TOKEN,
+        process.env.CLOUDFLARE_ACCOUNT_ID
+      );
     }
 
-    // Load Porkbun credentials
+    // Load Porkbun credentials from database, fallback to env vars
     const pbCreds = this.db.getCredentials('porkbun');
     if (pbCreds) {
       const { apiKey, secretKey } = JSON.parse(pbCreds);
       this.porkbun = new PorkbunService(apiKey, secretKey);
+    } else if (process.env.PORKBUN_API_KEY && process.env.PORKBUN_SECRET_KEY) {
+      this.porkbun = new PorkbunService(
+        process.env.PORKBUN_API_KEY,
+        process.env.PORKBUN_SECRET_KEY
+      );
     }
   }
 
